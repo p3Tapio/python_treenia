@@ -30,6 +30,7 @@ if syote == 'K':
         id +=1
 
 syote = input("Haluatko hakea lämpötilatiedot ilmatieteenlaitokselta?\r\n")
+monta = 0
 try:
     if syote=='K':
         monta = 0
@@ -46,9 +47,10 @@ try:
                 conn.request("GET", f"/saa/{x}/")
                 res = conn.getresponse()
                 html = str(res.read())
-                z = '<td colspan="3" class="temperature-container"> <div class="temperature positive" title="l&#xE4;mp&#xF6;tila '
-                index = html.index('<td colspan="3" class="temperature-container"> <div class="temperature positive" title="')
-                temp = html[index+len(z):index+len(z)+2]
+
+                z = 'class="temperature" data-v-732a7470><th role="rowheader" scope="row" class="offscreen" data-v-732a7470>L\xc3\xa4mp\xc3\xb6tila</th> <td role="cell" title="L\xc3\xa4mp\xc3\xb6tila\xa4mp\xc3\xb6tila  '
+                index = html.index('class="temperature" data-v-732a7470><th role="rowheader" scope="row" class="offscreen" data-v-732a7470>')
+                temp = html[index+len(z)+13:index+len(z)+16]
                 temp = temp.replace("&", "")
                 
                 if len(x)>7:
@@ -66,20 +68,23 @@ try:
         file.close() 
     
 except:
-    print(f"Virhe tilanne! Paikkakunnan {x} tietojen haku epäonnistui.\r\nOhjelman suoritus keskeytetty.\n")
+    print(f"\nVirhe tilanne! Paikkakunnan {x} tietojen haku epäonnistui.\r\nOhjelman suoritus keskeytetty.\n")
     date = datetime.now()
     tiedostoon = f"Virhe paikkakunnan {x} haussa \t---\t"+date.strftime("%d/%m/%Y, %H:%M")+" \n"
     with codecs.open("hakutiedot.txt", "a", encoding="utf-8") as file:
         file.write(tiedostoon)
     file.close() 
 
-syote = input("Haluatko tarkastaa lokin? (K = kyllä) \r\n")
-if syote=='K':
+syote = input("Haluatko tarkastaa lokin tai poistaa sen? (L = lue loki, P = Poista, muut napit lopettaa.) \r\n")
+if syote=='L':
     print("--------------------------\n")
     file = codecs.open("hakutiedot.txt", "r",encoding="utf-8")
     for rivi in file:
         print(rivi)
     file.close() 
+elif syote=='T':
+    os.remove("hakutiedot.txt")
+
 
 print("--------------------------\r\n\nKiitos käynnistä! \n")
 
