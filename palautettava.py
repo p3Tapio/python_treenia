@@ -34,29 +34,36 @@ try:
     if syote=='K':
         monta = 0
         for rivi in cursor.execute("SELECT * FROM Paikkakunnat"):
-            monta +=1
+
             x= ''.join(rivi)
-            url = "www.ilmatieteenlaitos.fi"
-            conn = http.client.HTTPSConnection(url)
-            conn.request("GET", f"/saa/{x}/")
-            res = conn.getresponse()
-            html = str(res.read())
-            z = '<td class="temperature-container"> <div class="temperature positive" title="l&#xE4;mp&#xF6;tila '
-            index = html.index('<td class="temperature-container"> <div class="temperature positive" title="')
-            temp = html[index+len(z):index+len(z)+2]
-            temp = temp.replace("&", "")
-            
-            if len(x)>7:
-                print(f'{x}\t{temp}c')
-            else:
-                print(f'{x}\t\t{temp}c')
-            
-    print(f"\nOhjelman suoritus päättyy. Noudettiin {monta} paikkakunnan säätietoa. Tiedot kirjoitettu lokiin.\r\n")
-    date = datetime.now()
-    tiedostoon = f"Haettu {monta} paikkakunnan lämpötila \t---\t"+date.strftime("%d/%m/%Y, %H:%M")+" \n"
-    with codecs.open("hakutiedot.txt", "a", encoding="utf-8") as file:
-        file.write(tiedostoon)
-    file.close() 
+            x = x.strip()
+
+            if x:
+                monta +=1
+                x= ''.join(rivi)
+                url = "www.ilmatieteenlaitos.fi"
+                conn = http.client.HTTPSConnection(url)
+                conn.request("GET", f"/saa/{x}/")
+                res = conn.getresponse()
+                html = str(res.read())
+                z = '<td colspan="3" class="temperature-container"> <div class="temperature positive" title="l&#xE4;mp&#xF6;tila '
+                index = html.index('<td colspan="3" class="temperature-container"> <div class="temperature positive" title="')
+                temp = html[index+len(z):index+len(z)+2]
+                temp = temp.replace("&", "")
+                
+                if len(x)>7:
+                    print(f'{x}\t{temp}c')
+                else:
+                    print(f'{x}\t\t{temp}c')
+    if monta == 0:
+        print("Ei haettavia paikkakuntia.")
+    else: 
+        print(f"\nOhjelman suoritus päättyy. Noudettiin {monta} paikkakunnan säätietoa. Tiedot kirjoitettu lokiin.\r\n")
+        date = datetime.now()
+        tiedostoon = f"Haettu {monta} paikkakunnan lämpötila \t---\t"+date.strftime("%d/%m/%Y, %H:%M")+" \n"
+        with codecs.open("hakutiedot.txt", "a", encoding="utf-8") as file:
+            file.write(tiedostoon)
+        file.close() 
     
 except:
     print(f"Virhe tilanne! Paikkakunnan {x} tietojen haku epäonnistui.\r\nOhjelman suoritus keskeytetty.\n")
